@@ -33,6 +33,13 @@ func NewApplication() *Application {
 	return &app
 }
 
+func (app *Application) RefreshPorts() {
+	port_string := app.ListAllPorts()
+
+	active_ports := formatPortString(port_string)
+	app.setActivePorts(active_ports)
+}
+
 func (a *Application) setActivePorts(active_ports []ActivePort) {
 	a.ActivePorts = active_ports
 }
