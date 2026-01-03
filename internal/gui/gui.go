@@ -46,9 +46,10 @@ func NewGUI(appLogic *application.Application) {
 	sendQValue := widget.NewLabel("")
 	peerLabel := widget.NewLabel("Peer:")
 	peerValue := widget.NewLabel("")
-
+	pidLabel := widget.NewLabel("PID:")
+	pidValue := widget.NewLabel("")
 	// Make value labels selectable and wrap text
-	valueLabels := []*widget.Label{protocolValue, stateValue, addressValue, portValue, processValue, recvQValue, sendQValue, peerValue}
+	valueLabels := []*widget.Label{protocolValue, stateValue, addressValue, portValue, processValue, recvQValue, sendQValue, peerValue, pidValue}
 	for _, lbl := range valueLabels {
 		lbl.Wrapping = fyne.TextWrapWord
 		lbl.Importance = widget.MediumImportance
@@ -64,6 +65,7 @@ func NewGUI(appLogic *application.Application) {
 		recvQLabel, recvQValue,
 		sendQLabel, sendQValue,
 		peerLabel, peerValue,
+		pidLabel, pidValue,
 	)
 
 	killBtn := widget.NewButton("Kill", func() {
@@ -95,6 +97,7 @@ func NewGUI(appLogic *application.Application) {
 		recvQValue.SetText(p.RecvQ)
 		sendQValue.SetText(p.SendQ)
 		peerValue.SetText(p.Peer_Addr_Port)
+		pidValue.SetText(p.PID)
 
 		detailsContent.Objects = []fyne.CanvasObject{
 			detailsTitle,

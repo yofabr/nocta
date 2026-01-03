@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -29,6 +30,7 @@ type ActivePort struct {
 	Peer_Addr_Port string
 	Process        string
 	PortDetails    PortDetail
+	PID            string
 }
 
 type Application struct {
@@ -53,6 +55,15 @@ func (app *Application) RefreshPorts() {
 
 func (a *Application) setActivePorts(active_ports []ActivePort) {
 	a.ActivePorts = active_ports
+}
+
+func extractPID(s string) string {
+	re := regexp.MustCompile(`pid=(\d+)`)
+	matches := re.FindStringSubmatch(s)
+	if len(matches) == 0 {
+		return ""
+	}
+	return matches[1]
 }
 
 func setLabels(labels *map[int]string, label string) {
@@ -83,7 +94,6 @@ func mapPort(port []string) ActivePort {
 	}
 
 	addr, prt := parseAddrPort(port[4])
-
 	active_port := ActivePort{
 		Protocol:       port[0],
 		State:          port[1],
@@ -92,6 +102,7 @@ func mapPort(port []string) ActivePort {
 		Addr:           addr,
 		Port:           prt,
 		Process:        port[6],
+		PID:            extractPID(port[6]),
 		Peer_Addr_Port: port[5],
 	}
 
