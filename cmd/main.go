@@ -7,5 +7,5 @@ import (
 
 func main() {
 	app := application.NewApplication()
-	gui.NewGUI(*app)
+	gui.NewGUI(app)
 }

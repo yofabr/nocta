@@ -9,6 +9,16 @@ import (
 	"strings"
 )
 
+type PortDetail struct {
+	User    string
+	PID     string
+	PPID    string
+	STAT    string
+	ELAPSED string
+	STARTED string
+	COMMAND string
+}
+
 type ActivePort struct {
 	Protocol       string
 	State          string
@@ -18,6 +28,7 @@ type ActivePort struct {
 	SendQ          string
 	Peer_Addr_Port string
 	Process        string
+	PortDetails    PortDetail
 }
 
 type Application struct {
@@ -178,3 +189,16 @@ func (a *Application) QueryPort(query QueryParams) string {
 
 	return string(out)
 }
+
+// func (a *Application) KillPort() {
+
+// }
+
+// func (a *ActivePort) Details() {
+// 	a.PortDetails = PortDetail{
+// 		PID:   "1222",
+// 		Owner: "test",
+// 	}
+
+// 	fmt.Println(a)
+// }
