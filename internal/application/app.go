@@ -18,7 +18,6 @@ type PortDetail struct {
 	STAT    string
 	ELAPSED string
 	STARTED string
-	COMMAND string
 }
 
 type ActivePort struct {
@@ -161,10 +160,6 @@ func mapPortDetails(port []string, labels map[int]string) PortDetail {
 
 	// COMMAND is the last field (full args - the second COMMAND column)
 	// The last COMMAND column (args) is always the last field in the data row
-	command := ""
-	if len(port) > 0 {
-		command = port[len(port)-1]
-	}
 
 	port_detail := PortDetail{
 		User:    getField(userIdx),
@@ -172,7 +167,6 @@ func mapPortDetails(port []string, labels map[int]string) PortDetail {
 		STAT:    getField(statIdx),
 		ELAPSED: getField(elapsedIdx),
 		STARTED: started,
-		COMMAND: command,
 	}
 
 	return port_detail
@@ -286,9 +280,10 @@ func (a *Application) QueryPort(query QueryParams) string {
 	return string(out)
 }
 
-// func (a *Application) KillPort() {
-
-// }
+func (a *Application) KillPort() {
+	// Coming soon...
+	// This is where you terminate the running port
+}
 
 func (a *ActivePort) Detail() {
 	// a.PortDetails = PortDetail{
@@ -301,12 +296,12 @@ func (a *ActivePort) Detail() {
 	output, err := cmd.Output()
 
 	if err != nil {
-		fmt.Println("Unable to get details")
+		// fmt.Println("Unable to get details")
 	}
 
 	rows := strings.Split(string(output), "\n")
 	if len(rows) < 2 {
-		fmt.Println("No process details found")
+		// fmt.Println("No process details found")
 		return
 	}
 

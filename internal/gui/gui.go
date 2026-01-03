@@ -58,13 +58,11 @@ func NewGUI(appLogic *application.Application) {
 	startedValue := widget.NewLabel("")
 	elapsedLabel := widget.NewLabel("ELAPSED:")
 	elapsedValue := widget.NewLabel("")
-	commandLabel := widget.NewLabel("COMMAND:")
-	commandValue := widget.NewLabel("")
 	// Make all value labels wrap text and set importance
 	valueLabels := []*widget.Label{
 		protocolValue, stateValue, addressValue, portValue, processValue,
 		recvQValue, sendQValue, peerValue, pidValue,
-		userValue, ppidValue, statValue, startedValue, elapsedValue, commandValue,
+		userValue, ppidValue, statValue, startedValue, elapsedValue,
 	}
 	for _, lbl := range valueLabels {
 		lbl.Wrapping = fyne.TextWrapWord
@@ -87,7 +85,6 @@ func NewGUI(appLogic *application.Application) {
 		statLabel, statValue,
 		startedLabel, startedValue,
 		elapsedLabel, elapsedValue,
-		commandLabel, commandValue,
 	)
 
 	killBtn := widget.NewButton("Kill", func() {
@@ -125,7 +122,6 @@ func NewGUI(appLogic *application.Application) {
 		statValue.SetText(p.PortDetails.STAT)
 		startedValue.SetText(p.PortDetails.STARTED)
 		elapsedValue.SetText(p.PortDetails.ELAPSED)
-		commandValue.SetText(p.PortDetails.COMMAND)
 
 		// Create scrollable container for the details form
 		scrollableForm := container.NewScroll(container.NewPadded(detailsForm))
