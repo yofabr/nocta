@@ -30,7 +30,7 @@ func NewGUI(appLogic *application.Application) {
 	detailsTitle.Alignment = fyne.TextAlignCenter
 
 	// Detail fields
-	protocolLabel := widget.NewLabel("Protocol:")
+	protocolLabel := widget.NewLabel("Protocol (Net-id):")
 	protocolValue := widget.NewLabel("")
 	stateLabel := widget.NewLabel("State:")
 	stateValue := widget.NewLabel("")
@@ -48,8 +48,24 @@ func NewGUI(appLogic *application.Application) {
 	peerValue := widget.NewLabel("")
 	pidLabel := widget.NewLabel("PID:")
 	pidValue := widget.NewLabel("")
-	// Make value labels selectable and wrap text
-	valueLabels := []*widget.Label{protocolValue, stateValue, addressValue, portValue, processValue, recvQValue, sendQValue, peerValue, pidValue}
+	userLabel := widget.NewLabel("USER:")
+	userValue := widget.NewLabel("")
+	ppidLabel := widget.NewLabel("PPID:")
+	ppidValue := widget.NewLabel("")
+	statLabel := widget.NewLabel("STAT:")
+	statValue := widget.NewLabel("")
+	startedLabel := widget.NewLabel("STARTED:")
+	startedValue := widget.NewLabel("")
+	elapsedLabel := widget.NewLabel("ELAPSED:")
+	elapsedValue := widget.NewLabel("")
+	commandLabel := widget.NewLabel("COMMAND:")
+	commandValue := widget.NewLabel("")
+	// Make all value labels wrap text and set importance
+	valueLabels := []*widget.Label{
+		protocolValue, stateValue, addressValue, portValue, processValue,
+		recvQValue, sendQValue, peerValue, pidValue,
+		userValue, ppidValue, statValue, startedValue, elapsedValue, commandValue,
+	}
 	for _, lbl := range valueLabels {
 		lbl.Wrapping = fyne.TextWrapWord
 		lbl.Importance = widget.MediumImportance
@@ -66,6 +82,12 @@ func NewGUI(appLogic *application.Application) {
 		sendQLabel, sendQValue,
 		peerLabel, peerValue,
 		pidLabel, pidValue,
+		userLabel, userValue,
+		ppidLabel, ppidValue,
+		statLabel, statValue,
+		startedLabel, startedValue,
+		elapsedLabel, elapsedValue,
+		commandLabel, commandValue,
 	)
 
 	killBtn := widget.NewButton("Kill", func() {
@@ -88,7 +110,7 @@ func NewGUI(appLogic *application.Application) {
 
 	// Update details function
 	updateDetails := func(p application.ActivePort) {
-		// p.Details()
+		p.Detail()
 		protocolValue.SetText(strings.ToUpper(p.Protocol))
 		stateValue.SetText(p.State)
 		addressValue.SetText(p.Addr)
@@ -98,11 +120,21 @@ func NewGUI(appLogic *application.Application) {
 		sendQValue.SetText(p.SendQ)
 		peerValue.SetText(p.Peer_Addr_Port)
 		pidValue.SetText(p.PID)
+		userValue.SetText(p.PortDetails.User)
+		ppidValue.SetText(p.PortDetails.PPID)
+		statValue.SetText(p.PortDetails.STAT)
+		startedValue.SetText(p.PortDetails.STARTED)
+		elapsedValue.SetText(p.PortDetails.ELAPSED)
+		commandValue.SetText(p.PortDetails.COMMAND)
+
+		// Create scrollable container for the details form
+		scrollableForm := container.NewScroll(container.NewPadded(detailsForm))
+		scrollableForm.SetMinSize(fyne.NewSize(0, 400))
 
 		detailsContent.Objects = []fyne.CanvasObject{
 			detailsTitle,
 			widget.NewSeparator(),
-			container.NewPadded(container.NewVBox(detailsForm)),
+			scrollableForm,
 			widget.NewSeparator(),
 			container.NewPadded(actionButtons),
 		}

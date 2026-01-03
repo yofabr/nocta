@@ -11,8 +11,9 @@ import (
 )
 
 type PortDetail struct {
-	User    string
-	PID     string
+	User string
+	// PID     string
+	// PID moved out of here...
 	PPID    string
 	STAT    string
 	ELAPSED string
@@ -67,10 +68,8 @@ func extractPID(s string) string {
 }
 
 func setLabels(labels *map[int]string, label string) {
-	for i, l := range strings.Split(strings.TrimSpace(label), " ") {
-		if l == "" {
-			continue
-		}
+	fields := strings.Fields(strings.TrimSpace(label))
+	for i, l := range fields {
 		(*labels)[i] = l
 	}
 }
@@ -109,6 +108,76 @@ func mapPort(port []string) ActivePort {
 	return active_port
 }
 
+func mapPortDetails(port []string, labels map[int]string) PortDetail {
+	if len(port) == 0 {
+		return PortDetail{}
+	}
+
+	// Find column indices from labels
+	userIdx := -1
+	ppidIdx := -1
+	statIdx := -1
+	elapsedIdx := -1
+	startedIdx := -1
+
+	for idx, label := range labels {
+		switch strings.ToUpper(label) {
+		case "USER":
+			userIdx = idx
+		case "PPID":
+			ppidIdx = idx
+		case "STAT":
+			statIdx = idx
+		case "ELAPSED":
+			elapsedIdx = idx
+		case "STARTED":
+			startedIdx = idx
+		}
+	}
+
+	// Helper to safely get field value
+	getField := func(idx int) string {
+		if idx >= 0 && idx < len(port) {
+			return port[idx]
+		}
+		return ""
+	}
+
+	// Parse STARTED field - it spans multiple columns (date + time)
+	// STARTED format: "Sat Jan  3 14:31:26 2026" (5 fields in data, 1 column in header)
+	// The ps lstart format always produces 5 fields: day, month, day-of-month, time, year
+	started := ""
+	if startedIdx >= 0 && startedIdx+4 < len(port) {
+		// STARTED always spans exactly 5 fields in the data row
+		startedParts := []string{
+			port[startedIdx],   // day (e.g., "Sat")
+			port[startedIdx+1], // month (e.g., "Jan")
+			port[startedIdx+2], // day-of-month (e.g., "3")
+			port[startedIdx+3], // time (e.g., "14:31:26")
+			port[startedIdx+4], // year (e.g., "2026")
+		}
+		started = strings.Join(startedParts, " ")
+	}
+
+	// COMMAND is the last field (full args - the second COMMAND column)
+	// The last COMMAND column (args) is always the last field in the data row
+	command := ""
+	if len(port) > 0 {
+		command = port[len(port)-1]
+	}
+
+	port_detail := PortDetail{
+		User:    getField(userIdx),
+		PPID:    getField(ppidIdx),
+		STAT:    getField(statIdx),
+		ELAPSED: getField(elapsedIdx),
+		STARTED: started,
+		COMMAND: command,
+	}
+
+	return port_detail
+}
+
 func setActivePorts(_activePorts *[]ActivePort, lines []string) {
 	for _, line := range lines {
 		fields := strings.Fields(line)
@@ -125,6 +194,22 @@ func setActivePorts(_activePorts *[]ActivePort, lines []string) {
 		}
 
 		*(_activePorts) = append(*_activePorts, mapPort(fields))
+	}
+}
+
+func setPortDetails(_portDetails *[]PortDetail, lines []string, labels map[int]string) {
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		fields := strings.Fields(line)
+		if len(fields) == 0 {
+			continue
+		}
+
+		*(_portDetails) = append(*_portDetails, mapPortDetails(fields, labels))
 	}
 }
 
@@ -205,11 +290,41 @@ func (a *Application) QueryPort(query QueryParams) string {
 
 // }
 
-// func (a *ActivePort) Details() {
-// 	a.PortDetails = PortDetail{
-// 		PID:   "1222",
-// 		Owner: "test",
-// 	}
+func (a *ActivePort) Detail() {
+	// a.PortDetails = PortDetail{
+	// 	PID:   "1222",
+	// 	Owner: "test",
+	// }
 
-// 	fmt.Println(a)
-// }
+	cmd := exec.Command("ps", "-p", a.PID, "-o", "user,pid,ppid,stat,etime,lstart,comm,args")
+
+	output, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println("Unable to get details")
+	}
+
+	rows := strings.Split(string(output), "\n")
+	if len(rows) < 2 {
+		fmt.Println("No process details found")
+		return
+	}
+
+	label := rows[0]
+	labels := map[int]string{}
+	setLabels(&labels, label)
+
+	portdetails := []PortDetail{}
+	setPortDetails(&portdetails, rows[1:], labels)
+
+	if len(portdetails) > 0 {
+		a.PortDetails = portdetails[0]
+	}
+	// fmt.Println("USER:", portdetails[0].User)
+	// fmt.Println("PPID:", portdetails[0].PPID)
+	// fmt.Println("STAT:", portdetails[0].STAT)
+	// fmt.Println("ELAPSED:", portdetails[0].ELAPSED)
+	// fmt.Println("STARTED:", portdetails[0].STARTED)
+	// fmt.Println("COMMAND:", portdetails[0].COMMAND)
+	a.PortDetails = portdetails[0]
+}
