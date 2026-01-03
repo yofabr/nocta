@@ -117,9 +117,6 @@ func formatPortString(port_string string) []ActivePort {
 
 	setActivePorts(&activePorts, cmd_list[1:])
 
-	for _, n := range activePorts {
-		fmt.Println(n)
-	}
 	return activePorts
 }
 
