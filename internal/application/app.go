@@ -280,9 +280,17 @@ func (a *Application) QueryPort(query QueryParams) string {
 	return string(out)
 }
 
-func (a *Application) KillPort() {
-	// Coming soon...
+func (a *ActivePort) KillPort() {
 	// This is where you terminate the running port
+
+	if a.PID == "" {
+		return
+	}
+
+	cmd := exec.Command("kill", a.PID)
+	cmd.Run()
+
+	// fmt.Println("Kill message:", output)
 }
 
 func (a *ActivePort) Detail() {

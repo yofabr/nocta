@@ -87,13 +87,6 @@ func NewGUI(appLogic *application.Application) {
 		elapsedLabel, elapsedValue,
 	)
 
-	killBtn := widget.NewButton("Kill", func() {
-		// TODO: Implement delete functionality
-	})
-	killBtn.Importance = widget.DangerImportance
-
-	actionButtons := container.NewGridWithColumns(3, killBtn)
-
 	// Empty state message
 	emptyStateLabel := widget.NewLabel("Select a port to see details")
 	emptyStateLabel.Alignment = fyne.TextAlignCenter
@@ -107,6 +100,12 @@ func NewGUI(appLogic *application.Application) {
 
 	// Update details function
 	updateDetails := func(p application.ActivePort) {
+		killBtn := widget.NewButton("Kill", func() {
+			p.KillPort()
+		})
+		killBtn.Importance = widget.DangerImportance
+		actionButtons := container.NewGridWithColumns(3, killBtn)
+
 		p.Detail()
 		protocolValue.SetText(strings.ToUpper(p.Protocol))
 		stateValue.SetText(p.State)
@@ -132,7 +131,9 @@ func NewGUI(appLogic *application.Application) {
 			widget.NewSeparator(),
 			scrollableForm,
 			widget.NewSeparator(),
-			container.NewPadded(actionButtons),
+		}
+		if p.PID != "" {
+			detailsContent.Objects = append(detailsContent.Objects, container.NewPadded(actionButtons))
 		}
 		detailsContent.Refresh()
 	}
