@@ -1,6 +1,6 @@
 module nocta
 
-go 1.25.5
+go 1.24.6
 
 require fyne.io/fyne/v2 v2.7.1
 
