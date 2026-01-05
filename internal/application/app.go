@@ -280,7 +280,7 @@ func (a *Application) QueryPort(query QueryParams) string {
 	return string(out)
 }
 
-func (a *ActivePort) KillPort() {
+func (a *ActivePort) TerminatePort() {
 	// This is where you terminate the running port
 
 	if a.PID == "" {

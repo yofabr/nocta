@@ -101,7 +101,7 @@ func NewGUI(appLogic *application.Application) {
 	// Update details function
 	updateDetails := func(p application.ActivePort) {
 		killBtn := widget.NewButton("Kill", func() {
-			p.KillPort()
+			p.TerminatePort()
 		})
 		killBtn.Importance = widget.DangerImportance
 		actionButtons := container.NewGridWithColumns(3, killBtn)
