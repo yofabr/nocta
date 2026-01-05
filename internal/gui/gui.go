@@ -138,13 +138,13 @@ func NewGUI(appLogic *application.Application) {
 		detailsContent.Refresh()
 	}
 
-	clearDetails := func() {
-		detailsContent.Objects = []fyne.CanvasObject{
-			detailsTitle,
-			emptyStateLabel,
-		}
-		detailsContent.Refresh()
-	}
+	// clearDetails := func() {
+	// 	detailsContent.Objects = []fyne.CanvasObject{
+	// 		detailsTitle,
+	// 		emptyStateLabel,
+	// 	}
+	// 	detailsContent.Refresh()
+	// }
 
 	rightPanel := container.NewPadded(
 		container.NewBorder(
@@ -195,7 +195,7 @@ func NewGUI(appLogic *application.Application) {
 		}
 		list.UnselectAll()
 		list.Refresh()
-		clearDetails()
+		// clearDetails()
 	}
 
 	// -----------------------------
@@ -212,7 +212,7 @@ func NewGUI(appLogic *application.Application) {
 			}
 			list.UnselectAll()
 			list.Refresh()
-			clearDetails()
+			// clearDetails()
 		},
 	)
 	protocolFilter.SetSelected("ALL")
@@ -246,7 +246,7 @@ func NewGUI(appLogic *application.Application) {
 
 		list.UnselectAll()
 		list.Refresh()
-		clearDetails()
+		// clearDetails()
 	})
 
 	// -----------------------------
