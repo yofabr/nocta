@@ -17,8 +17,7 @@ It helps developers quickly see which ports are open, what services are running,
 
 ## Screenshot
 
-![Dark theme Screenshot](./screenshots/dark.png)
-![Light theme Screenshot](./screenshots/light.png)
+![Screenshot](./screenshots/main.png)
 
 
 ## Use Cases
