@@ -100,11 +100,11 @@ func NewGUI(appLogic *application.Application) {
 
 	// Update details function
 	updateDetails := func(p application.ActivePort) {
-		killBtn := widget.NewButton("Kill", func() {
+		terminateBtn := widget.NewButton("Terminate", func() {
 			p.TerminatePort()
 		})
-		killBtn.Importance = widget.DangerImportance
-		actionButtons := container.NewGridWithColumns(3, killBtn)
+		terminateBtn.Importance = widget.DangerImportance
+		actionButtons := container.NewGridWithColumns(3, terminateBtn)
 
 		p.Detail()
 		protocolValue.SetText(strings.ToUpper(p.Protocol))
