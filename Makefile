@@ -1,5 +1,5 @@
 run:
-	go run ./cmd/main.go
+	go run ./cmd/nocta/main.go
 
 tidy:
 	go mod tidy

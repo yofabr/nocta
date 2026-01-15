@@ -1,0 +1,14 @@
+gui:
+  width: 900
+  height: 520
+  split: 0.35
+refresh:
+  interval: 30
+  auto: false
+filter:
+  default_protocol: ALL
+  show_closed: false
+notifications:
+  enabled: false
+  on_new: true
+  on_close: true
