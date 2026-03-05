@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -54,6 +55,10 @@ func Load() (*Config, error) {
 		if err := yaml.Unmarshal(data, config); err != nil {
 			return config, err
 		}
+
+		if err := Validate(config); err != nil {
+			return config, err
+		}
 	}
 
 	return config, nil
@@ -64,7 +69,7 @@ func Save(config *Config) error {
 
 	// Create config directory if it doesn't exist
 	configDir := filepath.Dir(configPath)
-	if err := os.MkdirAll(configDir, 0755); err != nil {
+	if err := os.MkdirAll(configDir, 0700); err != nil {
 		return err
 	}
 
@@ -73,10 +78,38 @@ func Save(config *Config) error {
 		return err
 	}
 
-	return os.WriteFile(configPath, data, 0644)
+	return os.WriteFile(configPath, data, 0600)
 }
 
 func getConfigPath() string {
-	homeDir, _ := os.UserHomeDir()
+	homeDir, err := os.UserHomeDir()
+	if err != nil || homeDir == "" {
+		if cwd, cwdErr := os.Getwd(); cwdErr == nil {
+			return filepath.Join(cwd, "config.yaml")
+		}
+		return "config.yaml"
+	}
+
 	return filepath.Join(homeDir, ".config", "nocta", "config.yaml")
+}
+
+func Validate(config *Config) error {
+	if config.GUI.Width < 320 || config.GUI.Height < 240 {
+		return fmt.Errorf("invalid GUI size: %dx%d", config.GUI.Width, config.GUI.Height)
+	}
+
+	if config.GUI.Split <= 0 || config.GUI.Split >= 1 {
+		return fmt.Errorf("invalid split value: %v", config.GUI.Split)
+	}
+
+	if config.Refresh.Interval < 1 || config.Refresh.Interval > 3600 {
+		return fmt.Errorf("invalid refresh interval: %d", config.Refresh.Interval)
+	}
+
+	switch config.Filter.DefaultProtocol {
+	case "ALL", "TCP", "UDP":
+		return nil
+	default:
+		return fmt.Errorf("invalid default protocol: %s", config.Filter.DefaultProtocol)
+	}
 }
