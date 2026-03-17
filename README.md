@@ -1,92 +1,47 @@
 ## Nocta
 
-A lightweight GUI application for monitoring and managing open ports on your system.
-Replace repetitive terminal commands like `ss`, `netstat`, or `lsof`.
+A lightweight desktop GUI for monitoring and managing open ports on your system—without jumping between repetitive `ss`, `netstat`, or `lsof` commands.
 
 ## Features
 
-- **Port Monitoring**: Real-time monitoring of TCP/UDP ports
-- **Process Details**: View detailed information about processes using ports
-- **Port Management**: Terminate processes associated with specific ports
-- **Search & Filter**: Search by port number, process name, or filter by protocol
-- **Configurable**: YAML-based configuration for customization
-- **Export**: Export port data to CSV/JSON formats
-- **Cross-platform**: Built with Fyne for Linux, macOS, and Windows
-
-## Project Structure
-
-```
-nocta/
-├── cmd/nocta/           # Application entry point
-├── internal/            # Private application code
-│   ├── config/         # Configuration management
-│   ├── gui/            # GUI components and application
-│   ├── logger/         # Structured logging
-│   ├── models/         # Data models and types
-│   ├── scanner/        # Port scanning logic
-│   └── service/        # Business logic layer
-├── pkg/                # Public libraries
-├── configs/            # Default configuration files
-└── README.md
-```
+- **Real-time Port Monitoring** for TCP/UDP listeners and connections
+- **Process Details** to quickly identify what owns each port
+- **Port Management** to terminate related processes when needed
+- **Search & Filter** by port, process name, and protocol
+- **Configurable Behavior** via YAML config file
+- **Data Export** to CSV and JSON
+- **Cross-platform** (Linux, macOS, Windows) via Fyne
 
 ## Installation
 
 ### From Source
 
-1. Clone the repository:
-
 ```bash
 git clone https://github.com/yofabr/nocta.git
 cd nocta
-```
-
-2. Build the application:
-
-```bash
 go build ./cmd/nocta
-```
-
-3. Run the application:
-
-```bash
 ./nocta
 ```
 
 ### From Release (Coming Soon)
 
-You can install Nocta by downloading the latest release tarball:
-
-1. Download the tar file:
-
 ```bash
 wget https://github.com/yofabr/nocta/releases/download/v1.0.0/nocta.tar.xz
-```
-
-2. Extract the archive:
-
-```bash
 tar -xf nocta.tar.xz
-```
-
-3. Run the installer
-
-```bash
 make install
-```
-
-4. Enter the extracted directory and run the application:
-
-```bash
 cd nocta
 ./nocta
 ```
 
-> Note: Make sure the `nocta` file is executable. If not, run `chmod +x nocta`.
+> If `nocta` is not executable, run: `chmod +x nocta`
 
 ## Configuration
 
-Nocta uses YAML configuration stored at `~/.config/nocta/config.yaml`. The default configuration includes:
+Nocta reads configuration from:
+
+`~/.config/nocta/config.yaml`
+
+Default example:
 
 ```yaml
 gui:
@@ -107,16 +62,36 @@ notifications:
 
 ## Usage
 
-1. **View Ports**: Launch Nocta to see all active network ports
-2. **Search**: Use the search bar to filter by port number or process name
-3. **Protocol Filter**: Filter ports by TCP, UDP, or view all
-4. **Port Details**: Click on any port to see detailed information
-5. **Terminate**: Use the Terminate button to stop processes (when available)
-6. **Refresh**: Click the refresh button or enable auto-refresh for updates
+### 1) Launch Nocta
+
+Run the application from your terminal:
+
+```bash
+./nocta
+```
+
+### 2) Inspect active ports
+
+On startup, Nocta loads currently active ports and process owners into the main table.
+
+### 3) Narrow results quickly
+
+- Use the **search field** to filter by port number or process name.
+- Use the **protocol filter** to switch between TCP, UDP, or all.
+
+### 4) Investigate and manage
+
+- Select a row to review process and socket details.
+- Use **Terminate** when available to stop a process bound to a port.
+
+### 5) Keep data up to date
+
+- Press **Refresh** for an immediate update.
+- Enable **auto-refresh** in config if you want periodic updates.
 
 ## Screenshot
 
-![Screenshot](./screenshots/main.png)
+![Nocta main window](./screenshots/main.png)
 
 ---
 
