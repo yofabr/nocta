@@ -1,20 +1,23 @@
 package components
 
 import (
+	"fmt"
 	"strings"
 
 	"nocta/internal/models"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
 type PortDetails struct {
 	container *fyne.Container
+	window    fyne.Window
 }
 
-func NewPortDetails() *PortDetails {
+func NewPortDetails(window fyne.Window) *PortDetails {
 	detailsTitle := widget.NewLabel("Port Details")
 	detailsTitle.TextStyle = fyne.TextStyle{Bold: true}
 	detailsTitle.Alignment = fyne.TextAlignCenter
@@ -30,6 +33,7 @@ func NewPortDetails() *PortDetails {
 
 	return &PortDetails{
 		container: detailsContent,
+		window:    window,
 	}
 }
 
@@ -120,7 +124,23 @@ func (pd *PortDetails) UpdateDetails(port models.ActivePort, terminateCallback f
 	}
 
 	if port.PID != "" {
-		terminateBtn := widget.NewButton("Terminate", terminateCallback)
+		terminateWithConfirm := func() {
+			confirmMsg := fmt.Sprintf(
+				"Are you sure you want to terminate process '%s' (PID: %s)?",
+				port.Process, port.PID,
+			)
+			dialog.ShowConfirm(
+				"Confirm Termination",
+				confirmMsg,
+				func(confirmed bool) {
+					if confirmed {
+						terminateCallback()
+					}
+				},
+				pd.window,
+			)
+		}
+		terminateBtn := widget.NewButton("Terminate", terminateWithConfirm)
 		terminateBtn.Importance = widget.DangerImportance
 		actionButtons := container.NewGridWithColumns(3, terminateBtn)
 		objects = append(objects, container.NewPadded(actionButtons))
