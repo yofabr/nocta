@@ -1,6 +1,8 @@
 package components
 
 import (
+	"time"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -14,6 +16,8 @@ type Controls struct {
 	onSearchChanged   func(string)
 	onProtocolChanged func(string)
 	onRefresh         func()
+	lastRefresh       time.Time
+	cooldown          time.Duration
 }
 
 func NewControls() *Controls {
@@ -38,6 +42,7 @@ func NewControls() *Controls {
 		protocolSelect: protocolSelect,
 		refreshButton:  refreshButton,
 		container:      controls,
+		cooldown:       2 * time.Second,
 	}
 }
 
@@ -48,7 +53,17 @@ func (c *Controls) SetCallbacks(onSearchChanged func(string), onProtocolChanged 
 
 	c.searchEntry.OnChanged = onSearchChanged
 	c.protocolSelect.OnChanged = onProtocolChanged
-	c.refreshButton.OnTapped = onRefresh
+
+	throttledRefresh := func() {
+		now := time.Now()
+		if now.Sub(c.lastRefresh) < c.cooldown {
+			return
+		}
+		c.lastRefresh = now
+		onRefresh()
+	}
+
+	c.refreshButton.OnTapped = throttledRefresh
 }
 
 func (c *Controls) GetSearchText() string {
