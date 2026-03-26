@@ -1,6 +1,10 @@
 package gui
 
 import (
+	"fmt"
+	"sync"
+
+	"nocta/internal/config"
 	"nocta/internal/gui/components"
 	"nocta/internal/models"
 	"nocta/internal/service"
@@ -8,19 +12,24 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 )
 
 type App struct {
 	service     service.PortService
+	config      *config.Config
 	portList    *components.PortList
 	portDetails *components.PortDetails
 	controls    *components.Controls
 	window      *fyne.Window
+	mu          sync.Mutex
+	terminating bool
 }
 
-func NewGUI(portService service.PortService) {
+func NewGUI(portService service.PortService, cfg *config.Config) {
 	a := &App{
 		service: portService,
+		config:  cfg,
 	}
 
 	a.setupUI()
@@ -34,7 +43,7 @@ func (a *App) setupUI() {
 	a.window = &w
 
 	a.portList = components.NewPortList(a.onPortSelected)
-	a.portDetails = components.NewPortDetails()
+	a.portDetails = components.NewPortDetails(*a.window)
 	a.controls = components.NewControls()
 
 	a.controls.SetCallbacks(
@@ -65,12 +74,13 @@ func (a *App) setupUI() {
 	split.Offset = 0.35
 
 	w.SetContent(split)
-	w.Resize(fyne.NewSize(900, 520))
+	w.Resize(fyne.NewSize(float32(a.config.GUI.Width), float32(a.config.GUI.Height)))
 }
 
 func (a *App) loadInitialData() {
 	ports, err := a.service.GetAllPorts()
 	if err != nil {
+		dialog.ShowError(fmt.Errorf("failed to load ports: %w", err), *a.window)
 		return
 	}
 	a.portList.SetPorts(ports)
@@ -81,8 +91,24 @@ func (a *App) run() {
 }
 
 func (a *App) onPortSelected(port models.ActivePort) {
-	a.service.GetPortDetails(&port)
+	if err := a.service.GetPortDetails(&port); err != nil {
+		dialog.ShowError(fmt.Errorf("failed to get port details: %w", err), *a.window)
+	}
 	a.portDetails.UpdateDetails(port, func() {
+		a.mu.Lock()
+		if a.terminating {
+			a.mu.Unlock()
+			return
+		}
+		a.terminating = true
+		a.mu.Unlock()
+
+		defer func() {
+			a.mu.Lock()
+			a.terminating = false
+			a.mu.Unlock()
+		}()
+
 		a.service.TerminatePort(port)
 		a.onRefresh()
 	})
@@ -99,6 +125,7 @@ func (a *App) onProtocolChanged(protocol string) {
 func (a *App) onRefresh() {
 	ports, err := a.service.RefreshPorts()
 	if err != nil {
+		dialog.ShowError(fmt.Errorf("failed to refresh ports: %w", err), *a.window)
 		return
 	}
 	a.portList.SetPorts(ports)
