@@ -40,6 +40,9 @@ type QueryParams struct {
 }
 
 func (q *QueryParams) ValidatePort() string {
+	if q.Port < 1 || q.Port > 65535 {
+		return ""
+	}
 	return strconv.Itoa(q.Port)
 }
 
