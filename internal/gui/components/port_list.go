@@ -2,6 +2,7 @@ package components
 
 import (
 	"strings"
+	"sync"
 
 	"nocta/internal/models"
 
@@ -14,6 +15,7 @@ type PortList struct {
 	ports      []models.ActivePort
 	filtered   []models.ActivePort
 	onSelected func(models.ActivePort)
+	mu         sync.RWMutex
 }
 
 func NewPortList(onSelected func(models.ActivePort)) *PortList {
@@ -37,6 +39,8 @@ func NewPortList(onSelected func(models.ActivePort)) *PortList {
 	)
 
 	pl.list.OnSelected = func(id widget.ListItemID) {
+		pl.mu.RLock()
+		defer pl.mu.RUnlock()
 		if id >= 0 && id < len(pl.filtered) {
 			pl.onSelected(pl.filtered[id])
 		}
@@ -46,12 +50,16 @@ func NewPortList(onSelected func(models.ActivePort)) *PortList {
 }
 
 func (pl *PortList) SetPorts(ports []models.ActivePort) {
+	pl.mu.Lock()
+	defer pl.mu.Unlock()
 	pl.ports = ports
 	pl.filtered = ports
 	pl.list.Refresh()
 }
 
 func (pl *PortList) Filter(searchText, protocolFilter string) {
+	pl.mu.Lock()
+	defer pl.mu.Unlock()
 	pl.filtered = nil
 
 	for _, port := range pl.ports {
@@ -79,5 +87,9 @@ func (pl *PortList) GetList() *widget.List {
 }
 
 func (pl *PortList) GetFilteredPorts() []models.ActivePort {
-	return pl.filtered
+	pl.mu.RLock()
+	defer pl.mu.RUnlock()
+	result := make([]models.ActivePort, len(pl.filtered))
+	copy(result, pl.filtered)
+	return result
 }
