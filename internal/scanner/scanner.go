@@ -1,6 +1,7 @@
 package scanner
 
 import (
+	"errors"
 	"nocta/internal/models"
 	"nocta/internal/parser"
 	"os/exec"
@@ -14,6 +15,8 @@ type Scanner interface {
 }
 
 type SystemScanner struct{}
+
+var pidRegex = regexp.MustCompile(`pid=(\d+)`)
 
 func NewSystemScanner() *SystemScanner {
 	return &SystemScanner{}
@@ -35,6 +38,9 @@ func (s *SystemScanner) QueryPort(query models.QueryParams) ([]models.ActivePort
 	}
 
 	port := query.ValidatePort()
+	if port == "" {
+		return nil, errors.New("invalid port number (must be 1-65535)")
+	}
 	filter := strings.Builder{}
 	filter.WriteString("sport = :")
 	filter.WriteString(port)
@@ -72,8 +78,7 @@ func parsePortString(portString string) []models.ActivePort {
 }
 
 func extractPID(s string) string {
-	re := regexp.MustCompile(`pid=(\d+)`)
-	matches := re.FindStringSubmatch(s)
+	matches := pidRegex.FindStringSubmatch(s)
 	if len(matches) == 0 {
 		return ""
 	}
